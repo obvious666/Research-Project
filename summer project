@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Sherline DT</title>
+    <style>
+        #info {
+            position: absolute;
+            padding: 20px;
+            margin: 0px;
+            overflow: hidden;
+        }
+
+        #startBtn {
+            background-color: rgb(19, 199, 19);
+            position: absolute;
+            padding: 6px 10px;
+            left: 30px;
+            top: 300px;
+        }
+        
+        #clearBtn {
+            background-color: rgb(240, 44, 44);
+            position: absolute;
+            padding: 6px 22px;
+            left: 120px;
+            top: 300px;
+        }
+    </style>
+</head>
+<body>
+    <!-- add real-time data display -->
+    <div id="info">
+        <div id="x-position">x</div>
+        <div id="y-position">y</div>
+        <div id="z-position">z</div>
+        <div id="powerstate">powerstate</div>
+        <div id="emergencystop">emergency stop</div>
+        <div id="controllermode">controller mode</div>
+        <div id="execution">execution</div>
+        <div id="feedrate">feedrate</div>
+        <div id="feedrateovr">feedrateovr</div>
+        <div id="currentline">currentline</div>
+        <div id="force-x">force X</div>
+        <div id="force-y">force Y</div>
+        <div id="force-z">force Z</div>
+    </div>
+
+    <!-- add buttons -->
+    <button id="startBtn">Tool Path</button>
+    <button id="clearBtn">Clear</button>
+    
+    <!-- source files -->
+    <script src="js/three.js"></script>
+    <script src="js/MTLLoader.js"></script>
+    <script src="js/OBJLoader.js"></script>
+    <script src="js/OrbitControls.js"></script>
+    <script src="js/AxesHelper.js"></script>
+
+    <!-- main program -->
+    <script>
+        var container;
+        container = document.createElement( 'div' );
+		document.body.appendChild( container );
+        
+        var scene = new THREE.Scene();
+
+        // show axesHelper
+        var axesHelper = new THREE.AxesHelper( 1000 );
+        // scene.add( axesHelper );
+
+        // Camera
+        var camera = new THREE.PerspectiveCamera(
+            80, window.innerWidth / window.innerHeight, 1, 2000);
+
+        camera.position.set(0, -400, 300);
+        camera.lookAt(new THREE.Vector3(0, 0, 100));
+        // scene.add(camera);
+        
+        // Set background
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setClearColor(0x8A8A83); // background color
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(renderer.domElement);
+        
+        // Resize widnow
+        window.addEventListener( 'resize', function()
+        {
+            var width = window.innerWidth;
+            var height = window.innerHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width/height;
+            camera.updateProjectionMatrix();
+        }
+        );
+
+        // View control
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.target.set(0, 0, 100);
+        controls.update();
+
+        // Add light1
+        var light1 = new THREE.PointLight(0xFFFFFF, 1.5, 1000);
+        light1.position.set(-300, -300, 500);
+        scene.add(light1);
+
+        // Add light2
+        var light2 = new THREE.PointLight(0xFFFFFF, 1, 1000);
+        light2.position.set(300, -300, 300);
+        scene.add(light2);
+
+        // Material
+        var material= new THREE.MeshLambertMaterial({color: 0x0DF1FD, wireframe: false});
+
+        // Add 3D model: base
+        var base = new THREE.Object3D();
+        var baseLoader = new THREE.OBJLoader();
+        var loader3 = new THREE.MTLLoader();
+        loader3.setPath("3D-models/");
+        loader3.load("base.mtl", function(materials){
+            materials.preload();
+
+            baseLoader.setMaterials(materials);
+            baseLoader.setPath("3D-models/");
+            baseLoader.load("base.obj", function(object){
+                base.add(object);
+                object.rotation.y = 1.5708;
+                object.position.set(2.6,234,51);
+                
+                scene.add(base);
+            });
+        });
+
+        // Add 3D model: y-block
+        var yblock = new THREE.Object3D();
+        var yblockLoader = new THREE.OBJLoader();
+        var loader = new THREE.MTLLoader();
+        loader.setPath("3D-models/");
+        loader.load("y-block.mtl", function(materials){
+            materials.preload();
+
+            yblockLoader.setMaterials(materials);
+            yblockLoader.setPath("3D-models/");
+            yblockLoader.load("y-block.obj", function(object){
+                yblock.add(object);
+                object.rotation.y = 1.5708;
+                object.position.set(2.6,234,51);
+                
+                scene.add(yblock);
+            });
+        });
+
+        // Add 3D model: z-block
+        var zblock = new THREE.Object3D();
+        var zblockLoader = new THREE.OBJLoader();
+        var loader = new THREE.MTLLoader();
+        loader.setPath("3D-models/");
+        loader.load("z-block.mtl", function(materials){
+            materials.preload();
+
+            zblockLoader.setMaterials(materials);
+            zblockLoader.setPath("3D-models/");
+            zblockLoader.load("z-block.obj", function(object){
+                zblock.add(object);
+                object.rotation.y = 1.5708;
+                object.position.set(2.6,234,51);
+                
+                scene.add(zblock);
+            });
+        });
+
+        // Add 3D model: tool holder + tool
+        var holder = new THREE.Object3D();
+        var holderLoader = new THREE.OBJLoader();
+        var loader2 = new THREE.MTLLoader();
+        loader2.setPath("3D-models/");
+        loader2.load("toolholder.mtl", function(materials){
+            materials.preload();
+
+            holderLoader.setMaterials(materials);
+            holderLoader.setPath("3D-models/");
+            holderLoader.load("toolholder.obj", function(object){
+                holder.add(object);
+                object.rotation.y = 1.5708;
+                object.position.set(2.6,234,51);
+                
+                scene.add(holder);
+            });
+        });
+
+        // Add 3D model: worktable
+        var worktable = new THREE.Object3D();
+        var worktableLoader = new THREE.OBJLoader();
+        var loader = new THREE.MTLLoader();
+        loader.setPath("3D-models/");
+        loader.load("worktable.mtl", function(materials){
+            materials.preload();
+
+            worktableLoader.setMaterials(materials);
+            worktableLoader.setPath("3D-models/");
+            worktableLoader.load("worktable.obj", function(object){
+                worktable.add(object);
+                object.rotation.y = 1.5708;
+                object.position.set(62.6,234,51);
+                
+                scene.add(worktable);
+            });
+        });
+
+        //draw the line
+        var xvalueofline, yvalueofline, zvalueofline;
+        xvalueofline = 0;
+        yvalueofline = 0;
+        zvalueofline = 0;
+        var i = 0;
+        var line;
+        var MAX_POINTS = 10000; //max points of line
+        var drawCount;
+        var splineArray = [];
+        var cancelpoint;
+        cancelpoint = 1;
+
+        var positions = new Float32Array(MAX_POINTS * 3); // 3 vertices per point
+        function drawline() {
+            // geometry
+            var geometry = new THREE.BufferGeometry();
+            // attributes
+            geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+            // drawcalls
+            geometry.setDrawRange(0, drawCount);
+            // material
+            var material = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 2 });
+            // line
+            line = new THREE.Line(geometry, material);
+            scene.add(line);
+        }
+
+        function updatePositionsofline() {
+        // tool path positions
+        var index = 0;
+        for (var i = 0; i < splineArray.length; i++) {
+            positions[index++] = splineArray[i].x - xvalue;
+            positions[index++] = splineArray[i].y - yvalue;
+            positions[index++] = splineArray[i].z - zvalue;
+        }
+        };
+
+        var xvalue;
+        var yvalue;
+        var zvalue;
+        var powerstate;
+        var emergencystop;
+        var controllermode;
+        var execution;
+        var feedrate;
+        var feedrateovr;
+        var currentline;
+        var forcex;
+        var forcey;
+        var forcez;
+        var a;
+        var b;
+
+        // update position
+        var update = function() 
+        {
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET", "http://192.168.10.101:5000/current", true);
+            xhttp.onreadystatechange = function () 
+            {
+                if (this.readyState == 4 && this.status == 200) 
+                {
+                    myFunction(this);         
+                }
+            };
+            xhttp.send(null);
+
+            function myFunction(xml) 
+            {
+                // retrieve real-time data
+                var xmlDoc = xml.responseXML;
+                a = xmlDoc.getElementsByTagName('Position')[1];
+                b = a.childNodes[0];
+                xvalue = b.nodeValue;
+                a = xmlDoc.getElementsByTagName('Position')[3];
+                b = a.childNodes[0];
+                yvalue = b.nodeValue;
+                a = xmlDoc.getElementsByTagName('Position')[5];
+                b = a.childNodes[0];
+                zvalue = b.nodeValue;
+
+                a = xmlDoc.getElementsByTagName('PowerState')[0];
+                b = a.childNodes[0];
+                powerstate = b.nodeValue;
+                a = xmlDoc.getElementsByTagName('EmergencyStop')[0];
+                b = a.childNodes[0];
+                emergencystop = b.nodeValue;
+                a = xmlDoc.getElementsByTagName('ControllerMode')[0];
+                b = a.childNodes[0];
+                controllermode = b.nodeValue;
+                a = xmlDoc.getElementsByTagName('Execution')[0];
+                b = a.childNodes[0];
+                execution = b.nodeValue;
+                a = xmlDoc.getElementsByTagName('PathFeedrate')[0];
+                b = a.childNodes[0];
+                feedrate = b.nodeValue;
+                a = xmlDoc.getElementsByTagName('FeedrateOvr')[0];
+                b = a.childNodes[0];
+                feedrateovr = b.nodeValue;
+                a = xmlDoc.getElementsByTagName('Line')[0];
+                b = a.childNodes[0];
+                currentline = b.nodeValue;
+                a = xmlDoc.getElementsByTagName('LinearForce')[0];
+                b = a.childNodes[0];
+                forcex = b.nodeValue;
+                a = xmlDoc.getElementsByTagName('LinearForce')[1];
+                b = a.childNodes[0];
+                forcey = b.nodeValue;
+                a = xmlDoc.getElementsByTagName('LinearForce')[2];
+                b = a.childNodes[0];
+                forcez = b.nodeValue;
+
+                // update x,y,z positions
+                worktable.position.set(-xvalue, -yvalue, 0); // reverse position
+                yblock.position.set(0, -yvalue, 0);
+                zblock.position.set(0, 0, zvalue);
+                holder.position.set(0, 0, zvalue);
+
+                // update line position
+                xvalue = parseFloat(xvalue);
+                yvalue = parseFloat(yvalue);
+                zvalue = parseFloat(zvalue);
+                xvalueofline = xvalue + 5.5;
+                yvalueofline = yvalue - 36.3;
+                zvalueofline = zvalue + 88.5; // z position offset
+                var vNow = new THREE.Vector3(xvalueofline, yvalueofline, zvalueofline);
+                splineArray.push(vNow);
+
+                // display real-time data
+                document.getElementById("x-position").innerHTML = 
+                "X-axis: " + xvalue;
+                document.getElementById("y-position").innerHTML = 
+                "Y-axis: " + yvalue;
+                document.getElementById("z-position").innerHTML = 
+                "Z-axis: " + zvalue;
+
+                document.getElementById("powerstate").innerHTML = 
+                "Power State: " + powerstate;
+                document.getElementById("emergencystop").innerHTML = 
+                "Emergency Stop: " + emergencystop;
+                document.getElementById("controllermode").innerHTML = 
+                "Controller Mode: " + controllermode;
+                document.getElementById("execution").innerHTML = 
+                "Execution: " + execution;
+                document.getElementById("feedrate").innerHTML = 
+                "Feedrate: " + feedrate;
+                document.getElementById("feedrateovr").innerHTML = 
+                "Feedrate Override: " + feedrateovr;
+                document.getElementById("currentline").innerHTML = 
+                "Current Line: " + currentline;
+                document.getElementById("force-x").innerHTML = 
+                "Force-X: " + forcex;
+                document.getElementById("force-y").innerHTML = 
+                "Force-Y: " + forcey;
+                document.getElementById("force-z").innerHTML = 
+                "Force-Z: " + forcez;
+            }
+            updatePositionsofline();
+        }
+
+        // draw Scene
+        var render = function() 
+        {
+            renderer.render(scene, camera);
+        }
+
+        //draw line
+        function animate() {
+            document.getElementById("clearBtn").addEventListener("click", function () { cancelpoint = 0; });
+            document.getElementById("startBtn").addEventListener("click", function () { cancelpoint = 1; });
+            // requestAnimationFrame(animate);
+            if (cancelpoint == 0) {
+                drawCount = 0;
+            }
+            else {
+                drawCount = (splineArray.length) % MAX_POINTS;
+            }
+            line.geometry.setDrawRange(0, drawCount);
+            line.geometry.attributes.position.needsUpdate = true; // required after the first render
+            //console.log(xvalueofline);
+            //console.log(yvalueofline);
+            //console.log(zvalueofline);
+        }
+
+        //run GameLoop
+        var GameLoop = function()
+        {
+            requestAnimationFrame(GameLoop);
+            controls.update();
+            update();
+            animate();
+            render();
+        }
+
+        drawline();
+        GameLoop();
+
+    </script>
+
+</body>
+</html>
